@@ -1,51 +1,53 @@
 require("dotenv").config();
 
 const express = require("express");
+const http = require("http");
 const pool = require("./src/config/db");
 
 const taskRoutes = require("./src/routes/task.routes");
+const fileRoutes = require("./src/routes/file.routes");
+
+const { initializeSocket } = require("./src/sockets/socket");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ==========================================
-// MIDDLEWARES
-// ==========================================
-
 app.use(express.json());
 
-// ==========================================
-// RUTA PRINCIPAL
-// ==========================================
-
 app.get("/", (req, res) => {
-  res.send("Bienvenido a TaskManager API");
+    res.send("Bienvenido a TaskManager API");
 });
 
-// ==========================================
-// RUTAS DE LA API
-// ==========================================
-
 app.use("/api/tasks", taskRoutes);
+app.use("/api", fileRoutes);
 
-// ==========================================
-// INICIAR SERVIDOR
-// ==========================================
+// Crear servidor HTTP
+const server = http.createServer(app);
+
+// Inicializar Socket.IO
+initializeSocket(server);
 
 async function startServer() {
-  try {
-    await pool.query("SELECT 1");
+    try {
+        await pool.query("SELECT 1");
 
-    console.log("Conexion con MySQL exitosa");
+        console.log("Conexion con MySQL exitosa");
 
-    app.listen(PORT, () => {
-      console.log(`Servidor activo en http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("Error al conectar con MySQL:", error.message);
+        server.listen(PORT, () => {
+            console.log(
+                `Servidor activo en http://localhost:${PORT}`
+            );
+            console.log("Socket.IO inicializado correctamente");
+        });
 
-    process.exit(1);
-  }
+    } catch (error) {
+        console.error(
+            "Error al conectar con MySQL:",
+            error.message
+        );
+
+        process.exit(1);
+    }
 }
 
 startServer();

@@ -1,4 +1,6 @@
+
 const pool = require("../config/db");
+const { getIO } = require("../sockets/socket");
 
 // ==========================================
 // GET: Obtener todas las tareas
@@ -108,6 +110,9 @@ const createTask = async (req, res) => {
             "SELECT * FROM tasks WHERE id = ?",
             [result.insertId]
         );
+
+        // Notificar a los clientes que se creó una tarea
+        getIO().emit("task:created", tasks[0]);
 
         return res.status(201).json({
             success: true,
@@ -221,6 +226,9 @@ const updateTask = async (req, res) => {
             [id]
         );
 
+        // Notificar a los clientes que se actualizó una tarea
+        getIO().emit("task:updated", updatedTasks[0]);
+
         return res.status(200).json({
             success: true,
             message: "Tarea actualizada correctamente.",
@@ -236,6 +244,7 @@ const updateTask = async (req, res) => {
         });
     }
 };
+
 // ==========================================
 // DELETE: Eliminar una tarea
 // ==========================================
@@ -269,6 +278,11 @@ const deleteTask = async (req, res) => {
             "DELETE FROM tasks WHERE id = ?",
             [id]
         );
+
+        // Notificar a los clientes que se eliminó una tarea
+        getIO().emit("task:deleted", {
+            id: Number(id)
+        });
 
         return res.status(200).json({
             success: true,
