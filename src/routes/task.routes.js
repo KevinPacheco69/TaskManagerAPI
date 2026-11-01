@@ -1,25 +1,27 @@
 const express = require("express");
-
 const router = express.Router();
 
-// Importar controladores
 const {
-  getAllTasks,
-  getTaskById,
-  createTask,
+    getAllTasks,
+    getTaskById,
+    createTask,
+    updateTask,
+    deleteTask
 } = require("../controllers/task.controller");
 
-// ==========================================
-// RUTAS DE TAREAS
-// ==========================================
-
-// GET: Obtener todas las tareas
+// Obtener todas las tareas
 router.get("/", getAllTasks);
 
-// GET: Obtener una tarea por ID
+// Obtener una tarea por ID
 router.get("/:id", getTaskById);
 
-// POST: Crear una tarea
+// Crear una tarea
 router.post("/", createTask);
+
+// Actualizar una tarea
+router.put("/:id", updateTask);
+
+// Eliminar una tarea
+router.delete("/:id", deleteTask);
 
 module.exports = router;
